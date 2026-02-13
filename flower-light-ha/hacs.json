@@ -1,0 +1,5 @@
+{
+  "name": "Flower Light",
+  "render_readme": true,
+  "domains": ["light", "sensor", "number"]
+}

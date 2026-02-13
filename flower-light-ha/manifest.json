@@ -1,0 +1,16 @@
+{
+  "domain": "flower_light",
+  "name": "Flower Light",
+  "codeowners": ["@yourusername"],
+  "config_flow": true,
+  "documentation": "https://github.com/yourusername/flower-light-ha",
+  "iot_class": "local_polling",
+  "requirements": ["bleak>=0.21.0", "bleak-retry-connector>=3.1.0", "msgpack>=1.0.0"],
+  "version": "1.0.0",
+  "bluetooth": [
+    {
+      "service_uuid": "28e17913-66c1-475f-a76e-86b5242f4cec",
+      "connectable": true
+    }
+  ]
+}

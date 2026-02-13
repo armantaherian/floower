@@ -1,0 +1,73 @@
+"""Constants for the Flower Light integration."""
+
+DOMAIN = "flower_light"
+
+# Bluetooth Service UUIDs
+SERVICE_COMMAND = "28e17913-66c1-475f-a76e-86b5242f4cec"
+SERVICE_CONFIG = "96f75832-8ce3-4800-b528-b39225282e9e"
+SERVICE_CONNECT = "c1724350-5989-4741-a21b-5878621468fa"
+SERVICE_BATTERY = "0000180f-0000-1000-8000-00805f9b34fb"  # Standard Battery Service
+SERVICE_DEVICE_INFO = "0000180a-0000-1000-8000-00805f9b34fb"  # Standard Device Info
+
+# Command Characteristics
+CHAR_COMMAND = "03c6eedc-22b5-4a0e-9110-2cd0131cd528"
+CHAR_STATE = "ac292c4b-8bd0-439b-9260-2d9526fff89a"
+
+# Config Characteristics
+CHAR_NAME = "ab130585-2b27-498e-a5a5-019391317350"
+CHAR_SPEED = "a54d8bbb-379b-425e-8d6e-84d0b20309aa"
+CHAR_BRIGHTNESS = "2be47e11-088c-47aa-ae77-e2453d840833"
+CHAR_MAX_OPEN = "86bbd86c-6056-446e-a63b-ebb313bb65a5"
+CHAR_COLOR_SCHEME = "10b8879e-0ea0-4fe2-9055-a244a1eaca8b"
+
+# Battery Characteristics
+CHAR_BATTERY_LEVEL = "00002a19-0000-1000-8000-00805f9b34fb"
+CHAR_BATTERY_POWER_STATE = "00002a1a-0000-1000-8000-00805f9b34fb"
+
+# Device Info Characteristics
+CHAR_MODEL = "00002a24-0000-1000-8000-00805f9b34fb"
+CHAR_SERIAL = "00002a25-0000-1000-8000-00805f9b34fb"
+CHAR_FIRMWARE = "00002a26-0000-1000-8000-00805f9b34fb"
+CHAR_HARDWARE = "00002a27-0000-1000-8000-00805f9b34fb"
+CHAR_MANUFACTURER = "00002a29-0000-1000-8000-00805f9b34fb"
+
+# Command Types
+CMD_WRITE_PETALS = 64
+CMD_WRITE_RGB_COLOR = 65
+CMD_WRITE_STATE = 67
+CMD_PLAY_ANIMATION = 69
+CMD_RUN_OTA_UPDATE = 70
+CMD_WRITE_WIFI = 71
+CMD_WRITE_NAME = 74
+CMD_WRITE_CUSTOMIZATION = 75
+CMD_WRITE_COLOR_SCHEME = 77
+
+# Effect mapping (animation IDs from firmware)
+# platformio/floower/src/hardware/Floower.h:
+#   0 = RAINBOW
+#   1 = RAINBOW_LOOP
+#   2 = CANDLE
+EFFECT_TO_ANIMATION_ID = {
+    "Rainbow": 0,
+    "Rainbow Loop": 1,
+    "Candle": 2,
+    # Backward-compat aliases for previous integration versions
+    "Breathing": 1,
+    "Fireplace": 2,
+}
+
+EFFECT_WIND = "Wind"
+
+EFFECT_LIST = ["Rainbow", "Rainbow Loop", "Candle", EFFECT_WIND]
+
+# Wind animation defaults (ported from webapp/app.js)
+WIND_MIN_OPEN_DEFAULT = 25
+WIND_MAX_OPEN_DEFAULT = 75
+WIND_CYCLE_SECONDS_DEFAULT = 9.0
+WIND_TICK_SECONDS_DEFAULT = 1.4
+WIND_TRANSITION_MS_DEFAULT = 1700
+
+# Defaults
+DEFAULT_TRANSITION_MS = 1000
+MIN_TRANSITION_MS = 0
+MAX_TRANSITION_MS = 60000
