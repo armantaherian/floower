@@ -1,0 +1,9 @@
+{
+  "name": "floower-webapp",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "cert:generate": "bash ./scripts/generate-local-cert.sh",
+    "dev:https": "node ./https-server.mjs"
+  }
+}

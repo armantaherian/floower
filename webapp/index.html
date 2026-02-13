@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Floower Control Panel</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="bg-orb orb-a"></div>
+  <div class="bg-orb orb-b"></div>
+  <main>
+    <header class="hero">
+      <div>
+        <h1>Floower Control Panel</h1>
+        <p>Web Bluetooth controller for `platformio/floower` firmware.</p>
+      </div>
+      <div class="actions">
+        <button id="connectBtn" class="primary">Connect</button>
+        <button id="disconnectBtn" disabled>Disconnect</button>
+        <button id="refreshBtn" disabled>Refresh</button>
+      </div>
+    </header>
+
+    <section class="card status-row">
+      <div><span class="label">BLE:</span> <span id="bleStatus">Disconnected</span></div>
+      <div><span class="label">WiFi:</span> <span id="wifiStatus">Unknown</span></div>
+      <div><span class="label">Battery:</span> <span id="batteryStatus">Unknown</span></div>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <h2>Live State</h2>
+        <label>Petals (% open)
+          <input id="petalsInput" type="range" min="0" max="100" value="0" />
+        </label>
+        <div id="petalsValue">0%</div>
+
+        <label>Color
+          <input id="colorInput" type="color" value="#ffffff" />
+        </label>
+
+        <label>Transition (ms)
+          <input id="transitionInput" type="number" min="0" max="60000" value="1000" />
+        </label>
+
+        <div class="actions wrap">
+          <button id="setStateBtn">Set State</button>
+          <button id="setPetalsBtn">Set Petals</button>
+          <button id="setColorBtn">Set Color</button>
+        </div>
+
+        <div class="inline-form">
+          <select id="animationSelect">
+            <option value="1">Rainbow Loop</option>
+            <option value="2">Candle</option>
+          </select>
+          <button id="playAnimationBtn">Play</button>
+        </div>
+
+        <hr class="section-divider" />
+        <h3>Wind Mode (Petals)</h3>
+        <p class="hint">Calm open/close movement like soft wind.</p>
+
+        <label>Min Open (%)
+          <input id="windMinInput" type="number" min="0" max="100" value="25" />
+        </label>
+
+        <label>Max Open (%)
+          <input id="windMaxInput" type="number" min="0" max="100" value="75" />
+        </label>
+
+        <label>Cycle (seconds)
+          <input id="windCycleInput" type="number" min="4" max="60" value="9" />
+        </label>
+
+        <div class="actions wrap">
+          <button id="startWindBtn">Start Wind Mode</button>
+          <button id="stopWindBtn" disabled>Stop Wind Mode</button>
+        </div>
+        <div id="windModeStatus" class="hint">Wind mode: Off</div>
+      </article>
+
+      <article class="card">
+        <h2>Customization</h2>
+        <label>Name
+          <input id="nameInput" type="text" maxlength="25" placeholder="Floower" />
+        </label>
+        <button id="saveNameBtn">Save Name</button>
+
+        <label>Speed (tenths of sec)
+          <input id="speedInput" type="number" min="5" max="255" value="50" />
+        </label>
+
+        <label>Brightness (0-100)
+          <input id="brightnessInput" type="number" min="0" max="100" value="70" />
+        </label>
+
+        <label>Max Open Level (0-100)
+          <input id="maxOpenInput" type="number" min="0" max="100" value="100" />
+        </label>
+
+        <button id="saveCustomizationBtn">Save Customization</button>
+      </article>
+
+      <article class="card">
+        <h2>WiFi / Floud</h2>
+        <label>WiFi SSID
+          <input id="ssidInput" type="text" maxlength="32" />
+        </label>
+
+        <label>WiFi Password
+          <input id="pwdInput" type="password" maxlength="64" />
+        </label>
+
+        <label>Floud Device ID
+          <input id="deviceIdInput" type="text" maxlength="40" />
+        </label>
+
+        <label>Floud Token
+          <input id="tokenInput" type="text" maxlength="40" />
+        </label>
+
+        <button id="saveWifiBtn">Save WiFi/Floud</button>
+      </article>
+
+      <article class="card">
+        <h2>Color Scheme</h2>
+        <p class="hint">Enter hex colors separated by comma, space, or newline (max 10).</p>
+        <textarea id="colorSchemeInput" rows="6" placeholder="#ffffff\n#ff0000\n#00ff00"></textarea>
+        <div id="schemePreview" class="swatches"></div>
+        <button id="saveSchemeBtn">Save Color Scheme</button>
+      </article>
+
+      <article class="card">
+        <h2>Device Info</h2>
+        <dl class="info-grid">
+          <dt>Model</dt><dd id="modelInfo">-</dd>
+          <dt>Serial</dt><dd id="serialInfo">-</dd>
+          <dt>Firmware</dt><dd id="firmwareInfo">-</dd>
+          <dt>Hardware</dt><dd id="hardwareInfo">-</dd>
+          <dt>Manufacturer</dt><dd id="manufacturerInfo">-</dd>
+          <dt>Token Hash</dt><dd id="tokenHashInfo">-</dd>
+        </dl>
+      </article>
+
+      <article class="card">
+        <h2>Log</h2>
+        <pre id="log"></pre>
+      </article>
+    </section>
+  </main>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
