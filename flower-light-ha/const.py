@@ -51,12 +51,13 @@ EFFECT_TO_ANIMATION_ID = {
     "Rainbow": 0,
     "Rainbow Loop": 1,
     "Candle": 2,
+    "Wind": 3,
     # Backward-compat aliases for previous integration versions
     "Breathing": 1,
     "Fireplace": 2,
 }
 
-EFFECT_LIST = ["Rainbow", "Rainbow Loop", "Candle"]
+EFFECT_LIST = ["Rainbow", "Rainbow Loop", "Candle", "Wind"]
 
 # Defaults
 DEFAULT_TRANSITION_MS = 1000

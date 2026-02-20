@@ -11,7 +11,8 @@
 enum FloowerColorAnimation {
     RAINBOW = 0,
     RAINBOW_LOOP = 1,
-    CANDLE = 2
+    CANDLE = 2,
+    WIND = 3
 };
 
 enum FloowerStatusAnimation {
@@ -85,6 +86,8 @@ class Floower {
         void pixelsRainbowAnimationUpdate(const AnimationParam& param);
         void pixelsRainbowLoopAnimationUpdate(const AnimationParam& param);
         void pixelsCandleAnimationUpdate(const AnimationParam& param);
+        void updateWindMode(unsigned long now);
+        void stopWindMode();
         void showColor(HsbColor color);
         void statusBlinkOnceAnimationUpdate(const AnimationParam& param);
         void statusPulsatingAnimationUpdate(const AnimationParam& param);
@@ -111,6 +114,9 @@ class Floower {
         bool interruptiblePixelsAnimation = false;
         HsbColor candleOriginColors[6];
         HsbColor candleTargetColors[6];
+        bool windModeActive = false;
+        unsigned long windModeStartedAt = 0;
+        unsigned long windModeLastTick = 0;
 
         // status LED
         HsbColor statusColor = colorBlack;

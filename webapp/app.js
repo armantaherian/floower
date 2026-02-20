@@ -67,12 +67,6 @@ const ui = {
   setColorBtn: byId("setColorBtn"),
   animationSelect: byId("animationSelect"),
   playAnimationBtn: byId("playAnimationBtn"),
-  windMinInput: byId("windMinInput"),
-  windMaxInput: byId("windMaxInput"),
-  windCycleInput: byId("windCycleInput"),
-  startWindBtn: byId("startWindBtn"),
-  stopWindBtn: byId("stopWindBtn"),
-  windModeStatus: byId("windModeStatus"),
 
   nameInput: byId("nameInput"),
   saveNameBtn: byId("saveNameBtn"),
@@ -106,8 +100,6 @@ const actionControlIds = [
   "setPetalsBtn",
   "setColorBtn",
   "playAnimationBtn",
-  "startWindBtn",
-  "stopWindBtn",
   "saveNameBtn",
   "saveCustomizationBtn",
   "saveWifiBtn",
@@ -120,9 +112,6 @@ const state = {
   services: {},
   chars: {},
   messageId: 1,
-  windModeTimer: null,
-  windModeStartedAt: 0,
-  windModeBusy: false,
 };
 
 const encoder = new TextEncoder();
@@ -144,7 +133,6 @@ function bindEvents() {
 
   ui.setStateBtn.addEventListener("click", async () => {
     try {
-      stopWindMode(true);
       const rgb = hexToRgb(ui.colorInput.value);
       await sendCommand(CMD.writeState, {
         l: clampInt(ui.petalsInput.value, 0, 100),
@@ -160,7 +148,6 @@ function bindEvents() {
 
   ui.setPetalsBtn.addEventListener("click", async () => {
     try {
-      stopWindMode(true);
       await sendCommand(CMD.writePetals, {
         l: clampInt(ui.petalsInput.value, 0, 100),
         t: clampInt(ui.transitionInput.value, 0, 60000),
@@ -186,24 +173,16 @@ function bindEvents() {
 
   ui.playAnimationBtn.addEventListener("click", async () => {
     try {
+      const selected = Number.parseInt(ui.animationSelect.value, 10);
+      if (Number.isNaN(selected) || selected < 0 || selected > 255) {
+        throw new Error("Invalid animation selection.");
+      }
       await sendCommand(CMD.playAnimation, {
-        a: clampInt(ui.animationSelect.value, 1, 255),
+        a: selected,
       });
     } catch (err) {
       reportError(err);
     }
-  });
-
-  ui.startWindBtn.addEventListener("click", async () => {
-    try {
-      await startWindMode();
-    } catch (err) {
-      reportError(err);
-    }
-  });
-
-  ui.stopWindBtn.addEventListener("click", () => {
-    stopWindMode();
   });
 
   ui.saveNameBtn.addEventListener("click", async () => {
@@ -307,7 +286,6 @@ async function disconnect() {
 }
 
 function onDisconnected() {
-  stopWindMode(true);
   log("Disconnected.");
   state.server = null;
   state.services = {};
@@ -574,80 +552,6 @@ function setConnectedUi(connected) {
 
   for (const id of actionControlIds) {
     ui[id].disabled = !connected;
-  }
-
-  setWindModeUi(connected && Boolean(state.windModeTimer));
-}
-
-async function startWindMode() {
-  if (!state.server || !state.chars.command) {
-    throw new Error("Connect to Floower before starting wind mode.");
-  }
-
-  const min = clampInt(ui.windMinInput.value, 0, 100);
-  const max = clampInt(ui.windMaxInput.value, 0, 100);
-  if (min >= max) {
-    throw new Error("Wind min open level must be lower than max.");
-  }
-
-  stopWindMode(true);
-  state.windModeStartedAt = Date.now();
-  state.windModeTimer = setInterval(runWindTick, 1400);
-  setWindModeUi(true);
-  log(`Wind mode started (range ${min}-${max}%, cycle ${clampInt(ui.windCycleInput.value, 4, 60)}s).`);
-  await runWindTick();
-}
-
-function stopWindMode(silent = false) {
-  if (state.windModeTimer) {
-    clearInterval(state.windModeTimer);
-    state.windModeTimer = null;
-  }
-  state.windModeBusy = false;
-  state.windModeStartedAt = 0;
-  setWindModeUi(false);
-  if (!silent) {
-    log("Wind mode stopped.");
-  }
-}
-
-function setWindModeUi(active) {
-  ui.startWindBtn.disabled = !state.server || active;
-  ui.stopWindBtn.disabled = !active;
-  ui.windModeStatus.textContent = active ? "Wind mode: Running" : "Wind mode: Off";
-}
-
-async function runWindTick() {
-  if (!state.windModeTimer || !state.server || !state.chars.command || state.windModeBusy) {
-    return;
-  }
-
-  state.windModeBusy = true;
-  try {
-    const min = clampInt(ui.windMinInput.value, 0, 100);
-    const max = clampInt(ui.windMaxInput.value, 0, 100);
-    if (min >= max) {
-      throw new Error("Wind min open level must be lower than max.");
-    }
-
-    const cycleSeconds = clampInt(ui.windCycleInput.value, 4, 60);
-    const phase = ((Date.now() - state.windModeStartedAt) / 1000) * (2 * Math.PI / cycleSeconds);
-
-    const baseWave = (Math.sin(phase) + 1) / 2;
-    const gustWave = (Math.sin(phase * 0.47 + 1.2) + 1) / 2;
-    const jitter = (Math.random() - 0.5) * 0.1;
-    const smooth = clamp(baseWave * 0.78 + gustWave * 0.22 + jitter, 0, 1);
-    const targetLevel = Math.round(min + (max - min) * smooth);
-
-    ui.petalsInput.value = targetLevel.toString();
-    ui.petalsValue.textContent = `${targetLevel}%`;
-
-    await sendCommand(CMD.writePetals, { l: targetLevel, t: 1700 });
-  } catch (err) {
-    stopWindMode(true);
-    reportError(err);
-  } finally {
-    state.windModeBusy = false;
   }
 }
 

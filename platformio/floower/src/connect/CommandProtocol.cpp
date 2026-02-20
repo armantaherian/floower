@@ -82,12 +82,22 @@ uint16_t CommandProtocol::run(const uint16_t type, const char *payload, const ui
             }
             case CommandType::CMD_PLAY_ANIMATION: {
                 // { a: <animationCode> }
-                uint8_t animation = jsonPayload["a"];
-                if (animation > 0) {
-                    floower->startAnimation(animation);
-                    fireControlCommandCallback();
+                if (!jsonPayload.containsKey("a")) {
+                    return STATUS_ERROR;
                 }
-                return STATUS_OK;
+
+                int animation = jsonPayload["a"];
+                if (animation == 255) {
+                    floower->stopAnimation(true);
+                    fireControlCommandCallback();
+                    return STATUS_OK;
+                }
+                if (animation >= FloowerColorAnimation::RAINBOW && animation <= FloowerColorAnimation::WIND) {
+                    floower->startAnimation((uint8_t) animation);
+                    fireControlCommandCallback();
+                    return STATUS_OK;
+                }
+                return STATUS_ERROR;
             }
             case CommandType::CMD_WRITE_WIFI: {
                 // { ssid: <wifiSsid>, pwd: <wifiPwd>, dvc: <floudDeviceId>, tkn: <floudToken> }
@@ -130,8 +140,8 @@ uint16_t CommandProtocol::run(const uint16_t type, const char *payload, const ui
                 if (size > 0 && size <= COLOR_SCHEME_MAX_LENGTH) {
                     HsbColor colors[array.size()];
                     ESP_LOGI(LOG_TAG, "New color scheme: %d", array.size());
-                    for (uint8_t i = 0; i < array.size(); i++) {\
-                        uint16_t hsValue = array.getElement(i).as<int>();
+                    for (uint8_t i = 0; i < array.size(); i++) {
+                        uint16_t hsValue = array[i].as<uint16_t>();
                         colors[i] = Config::decodeHSColor(hsValue);
                         ESP_LOGI(LOG_TAG, "Color %d: %.2f,%.2f", i, colors[i].H, colors[i].S);
                     }

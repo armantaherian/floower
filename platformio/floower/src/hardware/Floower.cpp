@@ -1,4 +1,5 @@
 #include "Floower.h"
+#include <math.h>
 
 #if defined(ARDUINO_ARCH_ESP32) && defined(CONFIG_ARDUHAL_ESP_LOG)
 #include "esp32-hal-log.h"
@@ -28,6 +29,12 @@ static const char* LOG_TAG = "Floower";
 #define TOUCH_LONG_TIME_THRESHOLD 2000 // 2s to recognize long touch
 #define TOUCH_HOLD_TIME_THRESHOLD 5000 // 5s to recognize hold touch
 #define TOUCH_COOLDOWN_TIME 300 // prevent random touch within 300ms after last touch
+
+#define WIND_MIN_OPEN_LEVEL 25
+#define WIND_MAX_OPEN_LEVEL 75
+#define WIND_CYCLE_SECONDS 9.0
+#define WIND_TICK_MILLIS 1400
+#define WIND_TRANSITION_MILLIS 1700
 
 unsigned long Floower::touchStartedTime = 0;
 unsigned long Floower::touchEndedTime = 0;
@@ -102,6 +109,7 @@ void Floower::update() {
     }
 
     unsigned long now = millis();
+    updateWindMode(now);
     if (touchStartedTime > 0) {
         unsigned int touchTime = now - touchStartedTime;
         unsigned long sinceLastTouch = now - lastTouchTime;
@@ -192,6 +200,9 @@ void Floower::onChange(FloowerChangeCallback callback) {
 }
 
 void Floower::setPetalsOpenLevel(int8_t level, int transitionTime) {
+    if (windModeActive) {
+        stopWindMode();
+    }
     petals->setPetalsOpenLevel(level, transitionTime);
     wasChanged = true;
 }
@@ -323,6 +334,18 @@ HsbColor Floower::getCurrentColor() {
 }
 
 void Floower::startAnimation(uint8_t animation) {
+    if (animation == WIND) {
+        animations.StopAnimation(ANIMATION_INDEX_LEDS);
+        interruptiblePixelsAnimation = false;
+        pixelsTargetColor = pixelsColor;
+        windModeActive = true;
+        windModeStartedAt = millis();
+        windModeLastTick = 0;
+        updateWindMode(windModeStartedAt);
+        return;
+    }
+
+    stopWindMode();
     interruptiblePixelsAnimation = true;
 
     if (animation == RAINBOW) {
@@ -344,10 +367,45 @@ void Floower::startAnimation(uint8_t animation) {
 }
 
 void Floower::stopAnimation(bool retainColor) {
+    stopWindMode();
     animations.StopAnimation(ANIMATION_INDEX_LEDS);
     if (retainColor) {
         pixelsTargetColor = pixelsColor;
     }
+}
+
+void Floower::updateWindMode(unsigned long now) {
+    if (!windModeActive) {
+        return;
+    }
+    if (windModeLastTick > 0 && now - windModeLastTick < WIND_TICK_MILLIS) {
+        return;
+    }
+    windModeLastTick = now;
+
+    double elapsedSeconds = (now - windModeStartedAt) / 1000.0;
+    double phase = elapsedSeconds * (2.0 * PI / WIND_CYCLE_SECONDS);
+
+    double baseWave = (sin(phase) + 1.0) / 2.0;
+    double gustWave = (sin(phase * 0.47 + 1.2) + 1.0) / 2.0;
+    double jitter = random(-500, 501) / 10000.0; // -0.05 .. +0.05
+    double smooth = baseWave * 0.78 + gustWave * 0.22 + jitter;
+    if (smooth < 0.0) {
+        smooth = 0.0;
+    }
+    else if (smooth > 1.0) {
+        smooth = 1.0;
+    }
+
+    int8_t targetLevel = round(WIND_MIN_OPEN_LEVEL + (WIND_MAX_OPEN_LEVEL - WIND_MIN_OPEN_LEVEL) * smooth);
+    petals->setPetalsOpenLevel(targetLevel, WIND_TRANSITION_MILLIS);
+    wasChanged = true;
+}
+
+void Floower::stopWindMode() {
+    windModeActive = false;
+    windModeStartedAt = 0;
+    windModeLastTick = 0;
 }
 
 void Floower::pixelsRainbowAnimationUpdate(const AnimationParam& param) {
@@ -404,7 +462,7 @@ bool Floower::isLit() {
 }
 
 bool Floower::isAnimating() {
-    return animations.IsAnimationActive(ANIMATION_INDEX_LEDS) || petals->arePetalsMoving();
+    return windModeActive || animations.IsAnimationActive(ANIMATION_INDEX_LEDS) || petals->arePetalsMoving();
 }
 
 bool Floower::isChangingColor() {

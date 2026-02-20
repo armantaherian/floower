@@ -52,33 +52,14 @@
 
         <div class="inline-form">
           <select id="animationSelect">
+            <option value="0">Rainbow</option>
             <option value="1">Rainbow Loop</option>
             <option value="2">Candle</option>
+            <option value="3">Wind</option>
+            <option value="255">Stop Animation</option>
           </select>
           <button id="playAnimationBtn">Play</button>
         </div>
-
-        <hr class="section-divider" />
-        <h3>Wind Mode (Petals)</h3>
-        <p class="hint">Calm open/close movement like soft wind.</p>
-
-        <label>Min Open (%)
-          <input id="windMinInput" type="number" min="0" max="100" value="25" />
-        </label>
-
-        <label>Max Open (%)
-          <input id="windMaxInput" type="number" min="0" max="100" value="75" />
-        </label>
-
-        <label>Cycle (seconds)
-          <input id="windCycleInput" type="number" min="4" max="60" value="9" />
-        </label>
-
-        <div class="actions wrap">
-          <button id="startWindBtn">Start Wind Mode</button>
-          <button id="stopWindBtn" disabled>Stop Wind Mode</button>
-        </div>
-        <div id="windModeStatus" class="hint">Wind mode: Off</div>
       </article>
 
       <article class="card">
